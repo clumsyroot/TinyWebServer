@@ -1,5 +1,6 @@
 #include "config.h"
 
+// 构造函数
 Config::Config()
 {
     // 端口号,默认9006
@@ -37,6 +38,7 @@ void Config::parse_arg(int argc, char *argv[])
 {
     int opt;
     const char *str = "p:l:m:o:s:t:c:a:";
+    // int getopt(int ___argc, char *const *___argv, const char *__shortopts)
     while ((opt = getopt(argc, argv, str)) != -1)
     {
         switch (opt)

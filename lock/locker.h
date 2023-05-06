@@ -43,6 +43,7 @@ class locker
 public:
     locker()
     {
+        // pthread_mutex_init() 返回 0 表示初始化成功
         if (pthread_mutex_init(&m_mutex, NULL) != 0)
         {
             throw std::exception();
@@ -50,14 +51,17 @@ public:
     }
     ~locker()
     {
+        // 销毁互斥锁
         pthread_mutex_destroy(&m_mutex);
     }
     bool lock()
     {
+        // pthread_mutex_lock() 获取互斥锁
         return pthread_mutex_lock(&m_mutex) == 0;
     }
     bool unlock()
     {
+        // pthread_mutex_unlock() 释放互斥锁
         return pthread_mutex_unlock(&m_mutex) == 0;
     }
     pthread_mutex_t *get()
@@ -66,6 +70,7 @@ public:
     }
 
 private:
+    // pthread_mutex_t 结构体类型 包含一些互斥锁相关的信息和状态
     pthread_mutex_t m_mutex;
 };
 class cond
@@ -75,7 +80,7 @@ public:
     {
         if (pthread_cond_init(&m_cond, NULL) != 0)
         {
-            //pthread_mutex_destroy(&m_mutex);
+            // pthread_mutex_destroy(&m_mutex);
             throw std::exception();
         }
     }
@@ -86,17 +91,17 @@ public:
     bool wait(pthread_mutex_t *m_mutex)
     {
         int ret = 0;
-        //pthread_mutex_lock(&m_mutex);
+        // pthread_mutex_lock(&m_mutex);
         ret = pthread_cond_wait(&m_cond, m_mutex);
-        //pthread_mutex_unlock(&m_mutex);
+        // pthread_mutex_unlock(&m_mutex);
         return ret == 0;
     }
     bool timewait(pthread_mutex_t *m_mutex, struct timespec t)
     {
         int ret = 0;
-        //pthread_mutex_lock(&m_mutex);
+        // pthread_mutex_lock(&m_mutex);
         ret = pthread_cond_timedwait(&m_cond, m_mutex, &t);
-        //pthread_mutex_unlock(&m_mutex);
+        // pthread_mutex_unlock(&m_mutex);
         return ret == 0;
     }
     bool signal()
@@ -109,7 +114,7 @@ public:
     }
 
 private:
-    //static pthread_mutex_t m_mutex;
+    // static pthread_mutex_t m_mutex;
     pthread_cond_t m_cond;
 };
 #endif
