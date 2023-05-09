@@ -8,18 +8,19 @@
 #include <list>
 #include <pthread.h>
 
+// 通过使用 template，可以将类型参数化，从而编写一次代码，可以用于不同的数据类型，而无需编写多个函数或类。
 template <typename T>
 class threadpool
 {
 public:
-    /*thread_number是线程池中线程的数量，max_requests是请求队列中最多允许的、等待处理的请求的数量*/
+    // thread_number 是线程池中线程的数量，max_requests 是请求队列中最多允许的、等待处理的请求的数量
     threadpool(int actor_model, connection_pool *connPool, int thread_number = 8, int max_request = 10000);
     ~threadpool();
     bool append(T *request, int state);
     bool append_p(T *request);
 
 private:
-    /*工作线程运行的函数，它不断从工作队列中取出任务并执行之*/
+    // 工作线程运行的函数，它不断从工作队列中取出任务并执行之
     static void *worker(void *arg);
     void run();
 
