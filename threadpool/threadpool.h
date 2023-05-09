@@ -10,6 +10,9 @@
 
 // 通过使用 template ，可以将类型参数化，从而编写一次代码，可以用于不同的数据类型，而无需编写多个函数或类。
 template <typename T>
+// 线程池，在服务器启动的时候就被完全创建好并初始化 (静态资源) -- 空间换时间
+// 处理客户请求时，如果需要相关的资源，直接从池中获取，无需动态分配
+// 处理完后，将相关的资源放回池中
 class threadpool
 {
 public:
@@ -36,11 +39,12 @@ private:
 };
 
 template <typename T>
+// 构造函数，在服务器启动时就创建具有 thread_number 个线程的线程池
 threadpool<T>::threadpool(int actor_model, connection_pool *connPool, int thread_number, int max_requests) : m_actor_model(actor_model), m_thread_number(thread_number), m_max_requests(max_requests), m_threads(NULL), m_connPool(connPool)
 {
     if (thread_number <= 0 || max_requests <= 0)
         throw std::exception();
-    m_threads = new pthread_t[m_thread_number];
+    m_threads = new pthread_t[m_thread_number]; // new pthread_t[] 为线程数组分配内存
     if (!m_threads)
         throw std::exception();
     for (int i = 0; i < thread_number; ++i)
@@ -98,7 +102,7 @@ bool threadpool<T>::append_p(T *request)
 template <typename T>
 void *threadpool<T>::worker(void *arg)
 {
-    threadpool *pool = (threadpool *)arg;
+    threadpool *pool = (threadpool *)arg; // 将 arg 指针强制转换成 threadpool 指针
     pool->run();
     return pool;
 }
