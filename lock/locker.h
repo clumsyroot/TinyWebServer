@@ -5,11 +5,17 @@
 #include <pthread.h>
 #include <semaphore.h>
 
+// 封装 POSIX 信号量: 初始化、等待和释放
 class sem
 {
 public:
     sem()
     {
+        // int sem_init(sem_t *__sem, int __pshared, unsigned int __value)
+        // `sem` --> 指向要初始的信号量的指针
+        // `__pshared` --> 表示信号量的共享类型，为 0 表示信号量是进程内可见的，即只能在同一进程的线程中使用，非 0 表示信号量是进程间共享的，默认为 0
+        // `__value` --> 信号量的初始值，必须为非负整数，表示资源总量
+        // sem_init() 返回值为 0 表示初始化成功，返回其他值表示初始化失败
         if (sem_init(&m_sem, 0, 0) != 0)
         {
             throw std::exception();
