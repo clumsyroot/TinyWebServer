@@ -1,7 +1,7 @@
 #include "http_conn.h"
 
-#include <mysql/mysql.h>
 #include <fstream>
+#include <mysql/mysql.h>
 
 // 定义http响应的一些状态信息
 const char *ok_200_title = "OK";
@@ -109,7 +109,7 @@ void http_conn::close_conn(bool real_close)
     }
 }
 
-// 初始化连接,外部调用初始化套接字地址
+// 初始化连接, 外部调用初始化套接字地址
 void http_conn::init(int sockfd, const sockaddr_in &addr, char *root, int TRIGMode,
                      int close_log, string user, string passwd, string sqlname)
 {
@@ -119,7 +119,7 @@ void http_conn::init(int sockfd, const sockaddr_in &addr, char *root, int TRIGMo
     addfd(m_epollfd, sockfd, true, m_TRIGMode);
     m_user_count++;
 
-    // 当浏览器出现连接重置时，可能是网站根目录出错或http响应格式出错或者访问的文件中内容完全为空
+    // 当浏览器出现连接重置时，可能是网站根目录出错或 http 响应格式出错或者访问的文件中内容完全为空
     doc_root = root;
     m_TRIGMode = TRIGMode;
     m_close_log = close_log;
@@ -206,6 +206,7 @@ bool http_conn::read_once()
     // LT读取数据
     if (0 == m_TRIGMode)
     {
+        // recv() 用于从已连接的套接字接收数据
         bytes_read = recv(m_sockfd, m_read_buf + m_read_idx, READ_BUFFER_SIZE - m_read_idx, 0);
         m_read_idx += bytes_read;
 
@@ -238,15 +239,21 @@ bool http_conn::read_once()
     }
 }
 
-// 解析http请求行，获得请求方法，目标url及http版本号
+// 解析 http 请求行，获得请求方法，目标 url 及 http 版本号
 http_conn::HTTP_CODE http_conn::parse_request_line(char *text)
 {
+    // char *strpbrk(char *__s, const char *__accept)
+    // 用于在一个字符串中查找第一个出现的 任意字符集合 中的字符，并返回该字符在字符串中的位置
+    // 在 HTTP 报文中，请求行用来说明请求类型，要访问的资源以及所使用的 HTTP 版本，其中各个部分之间通过 '\t' 或空格分隔
     m_url = strpbrk(text, " \t");
+    // 如果没有空格或 '\t' 则请求错误
     if (!m_url)
     {
         return BAD_REQUEST;
     }
+    // 将空格或 '\t' 改为 '\0'
     *m_url++ = '\0';
+    // 取出数据，并通过与 GET 和 POST 比较，以确定请求方式
     char *method = text;
     if (strcasecmp(method, "GET") == 0)
         m_method = GET;
@@ -257,14 +264,21 @@ http_conn::HTTP_CODE http_conn::parse_request_line(char *text)
     }
     else
         return BAD_REQUEST;
+
+    // m_url 此时跳过了第一个空格或 '\t' 字符，但不知道之后是否还有
     m_url += strspn(m_url, " \t");
     m_version = strpbrk(m_url, " \t");
     if (!m_version)
         return BAD_REQUEST;
     *m_version++ = '\0';
     m_version += strspn(m_version, " \t");
+
+    // 仅支持 HTTP/1.1
     if (strcasecmp(m_version, "HTTP/1.1") != 0)
         return BAD_REQUEST;
+
+    // 对请求资源的前 7 个字符进行判断
+    // 这里主要是有些报文的请求资源中会带有 "http://" ，这里需要针对这种情况进行单独处理
     if (strncasecmp(m_url, "http://", 7) == 0)
     {
         m_url += 7;
@@ -279,14 +293,14 @@ http_conn::HTTP_CODE http_conn::parse_request_line(char *text)
 
     if (!m_url || m_url[0] != '/')
         return BAD_REQUEST;
-    // 当url为/时，显示判断界面
+    // 当 url 为 '/' 时，显示判断界面
     if (strlen(m_url) == 1)
         strcat(m_url, "judge.html");
     m_check_state = CHECK_STATE_HEADER;
     return NO_REQUEST;
 }
 
-// 解析http请求的一个头部信息
+// 解析 http 请求的一个头部信息
 http_conn::HTTP_CODE http_conn::parse_headers(char *text)
 {
     if (text[0] == '\0')
@@ -326,13 +340,13 @@ http_conn::HTTP_CODE http_conn::parse_headers(char *text)
     return NO_REQUEST;
 }
 
-// 判断http请求是否被完整读入
+// 判断 http 请求是否被完整读入
 http_conn::HTTP_CODE http_conn::parse_content(char *text)
 {
     if (m_read_idx >= (m_content_length + m_checked_idx))
     {
         text[m_content_length] = '\0';
-        // POST请求中最后为输入的用户名和密码
+        // POST 请求中最后为输入的用户名和密码
         m_string = text;
         return GET_REQUEST;
     }
@@ -392,7 +406,7 @@ http_conn::HTTP_CODE http_conn::do_request()
     // printf("m_url:%s\n", m_url);
     const char *p = strrchr(m_url, '/');
 
-    // 处理cgi
+    // 处理 cgi
     if (cgi == 1 && (*(p + 1) == '2' || *(p + 1) == '3'))
     {
 
@@ -406,7 +420,7 @@ http_conn::HTTP_CODE http_conn::do_request()
         free(m_url_real);
 
         // 将用户名和密码提取出来
-        // user=123&passwd=123
+        // user=123 & passwd=123
         char name[100], password[100];
         int i;
         for (i = 5; m_string[i] != '&'; ++i)
@@ -446,7 +460,7 @@ http_conn::HTTP_CODE http_conn::do_request()
                 strcpy(m_url, "/registerError.html");
         }
         // 如果是登录，直接判断
-        // 若浏览器端输入的用户名和密码在表中可以查找到，返回1，否则返回0
+        // 若浏览器端输入的用户名和密码在表中可以查找到，返回 1 ，否则返回 0
         else if (*(p + 1) == '2')
         {
             if (users.find(name) != users.end() && users[name] == password)

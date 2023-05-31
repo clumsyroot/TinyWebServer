@@ -80,30 +80,48 @@ public:
     ~http_conn() {}
 
 public:
+    // 初始化套接字地址，函数内部会调用私有方法 init
     void init(int sockfd, const sockaddr_in &addr, char *, int, int, string user, string passwd, string sqlname);
+    // 关闭 http 连接
     void close_conn(bool real_close = true);
     void process();
+    // 读取浏览器端发来的全部数据
     bool read_once();
+    // 响应报文写入函数
     bool write();
     sockaddr_in *get_address()
     {
         return &m_address;
     }
+    // 同步线程初始化数据库读取表
     void initmysql_result(connection_pool *connPool);
     int timer_flag;
     int improv;
 
 private:
     void init();
+    // 从 m_read_buf 读取，并处理请求报文
     HTTP_CODE process_read();
+    // 向 m_write_buf 写入响应报文数据
     bool process_write(HTTP_CODE ret);
+    // 主状态机解析报文中的请求行数据
     HTTP_CODE parse_request_line(char *text);
+    // 主状态机解析报文中请求头数据
     HTTP_CODE parse_headers(char *text);
+    // 主状态机解析报文中的请求内容
     HTTP_CODE parse_content(char *text);
+    // 生成响应报文
     HTTP_CODE do_request();
+
+    // m_start_line 是已经解析的字符
+    // get_line 用于将指针向后偏移，指向未处理的字符
     char *get_line() { return m_read_buf + m_start_line; };
+
+    // 从状态机读取一行，分析是请求报文的哪一部分
     LINE_STATUS parse_line();
+
     void unmap();
+    // 根据响应报文格式，生成 8 个对应部分，以下函数均由 do_request 调用
     bool add_response(const char *format, ...);
     bool add_content(const char *content);
     bool add_status_line(int status, const char *title);

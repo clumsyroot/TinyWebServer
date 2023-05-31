@@ -2,7 +2,7 @@
 
 WebServer::WebServer()
 {
-    // http_conn类对象
+    // http_conn 类对象
     users = new http_conn[MAX_FD];
 
     // root文件夹路径
@@ -103,6 +103,8 @@ void WebServer::thread_pool()
 void WebServer::eventListen()
 {
     // 网络编程基础步骤
+    // 创建一个 IPV4 的 TCP 套接字
+    // 如果成功创建，则返回一个大于 0 的文件描述符
     m_listenfd = socket(PF_INET, SOCK_STREAM, 0);
     assert(m_listenfd >= 0);
 
@@ -120,9 +122,16 @@ void WebServer::eventListen()
 
     int ret = 0;
     struct sockaddr_in address;
-    bzero(&address, sizeof(address));
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    // void bzero(void *__s, size_t __n)
+    // 用于将指定内存区域内的内容全部置零，已经过时，不再被推荐使用
+    // 建议使用 menset() 函数来替代
+    // void * memset(void *__s, int __c, size_t __n)
+    // bzero(&address, sizeof(address));
+    memset(&address, 0, sizeof(address));
+
+    address.sin_family = AF_INET;                // AF_INET 是一个常量，用于表示 IPv4 地址族 (Address Family)
+    address.sin_addr.s_addr = htonl(INADDR_ANY); // htonl --> 字节序转换
     address.sin_port = htons(m_port);
 
     int flag = 1;
@@ -134,7 +143,7 @@ void WebServer::eventListen()
 
     utils.init(TIMESLOT);
 
-    // epoll创建内核事件表
+    // epoll 创建内核事件表
     epoll_event events[MAX_EVENT_NUMBER];
     m_epollfd = epoll_create(5);
     assert(m_epollfd != -1);
@@ -162,7 +171,7 @@ void WebServer::timer(int connfd, struct sockaddr_in client_address)
 {
     users[connfd].init(connfd, client_address, m_root, m_CONNTrigmode, m_close_log, m_user, m_passWord, m_databaseName);
 
-    // 初始化client_data数据
+    // 初始化 client_data 数据
     // 创建定时器，设置回调函数和超时时间，绑定用户数据，将定时器添加到链表中
     users_timer[connfd].address = client_address;
     users_timer[connfd].sockfd = connfd;
@@ -175,7 +184,7 @@ void WebServer::timer(int connfd, struct sockaddr_in client_address)
     utils.m_timer_lst.add_timer(timer);
 }
 
-// 若有数据传输，则将定时器往后延迟3个单位
+// 若有数据传输，则将定时器往后延迟 3 个单位
 // 并对新的定时器在链表上的位置进行调整
 void WebServer::adjust_timer(util_timer *timer)
 {
@@ -217,7 +226,6 @@ bool WebServer::dealclinetdata()
         }
         timer(connfd, client_address);
     }
-
     else
     {
         while (1)
