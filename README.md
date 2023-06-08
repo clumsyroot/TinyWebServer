@@ -43,25 +43,25 @@ Linux下C++轻量级Web服务器，助力初学者快速实践网络编程，搭
 
 框架
 -------------
-<div align=center><img src="http://ww1.sinaimg.cn/large/005TJ2c7ly1ge0j1atq5hj30g60lm0w4.jpg" height="765"/> </div>
+<div align=center><img src="./root/demo_img/kuangjia.jpg" height="765"/> </div>
 
 Demo演示
 ----------
 > * 注册演示
 
-<div align=center><img src="http://ww1.sinaimg.cn/large/005TJ2c7ly1ge0iz0dkleg30m80bxjyj.gif" height="429"/> </div>
+<div align=center><img src="./root/demo_img/zhuce.gif" height="429"/> </div>
 
 > * 登录演示
 
-<div align=center><img src="https://github.com/qinguoyi/TinyWebServer/blob/master/root/login.gif" height="429"/> </div>
+<div align=center><img src="./root/demo_img/denglu.gif" height="429"/> </div>
 
 > * 请求图片文件演示(6M)
 
-<div align=center><img src="http://ww1.sinaimg.cn/large/005TJ2c7ly1ge0juxrnlfg30go07x4qr.gif" height="429"/> </div>
+<div align=center><img src="./root/demo_img/request_img.gif" height="429"/> </div>
 
 > * 请求视频文件演示(39M)
 
-<div align=center><img src="http://ww1.sinaimg.cn/large/005TJ2c7ly1ge0jtxie8ng30go07xb2b.gif" height="429"/> </div>
+<div align=center><img src="./root/demo_img/request_avi.gif" height="429"/> </div>
 
 
 压力测试
@@ -70,7 +70,7 @@ Demo演示
 
 > * Proactor，LT + LT，93251 QPS
 
-<div align=center><img src="http://ww1.sinaimg.cn/large/005TJ2c7ly1gfjqu2hptkj30gz07474n.jpg" height="201"/> </div>
+<div align=center><img src="root/demo_img/86a33306736306c6d3077342e6a7067.jpg" height="201"/> </div>
 
 > * Proactor，LT + ET，97459 QPS
 
