@@ -131,8 +131,8 @@ void WebServer::eventListen()
     memset(&address, 0, sizeof(address));
 
     address.sin_family = AF_INET;                // AF_INET 是一个常量，用于表示 IPv4 地址族 (Address Family)
-    address.sin_addr.s_addr = htonl(INADDR_ANY); // htonl --> 字节序转换
-    address.sin_port = htons(m_port);
+    address.sin_addr.s_addr = htonl(INADDR_ANY); // htonl --> 字节序转换 host to net large 32 位
+    address.sin_port = htons(m_port);            // htons --> host to net short 16 位
 
     int flag = 1;
     setsockopt(m_listenfd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag));
